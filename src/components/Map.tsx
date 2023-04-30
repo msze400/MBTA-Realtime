@@ -11,6 +11,7 @@ import LineString from 'ol/geom/LineString';
 import 'ol/ol.css';
 import { fromLonLat } from 'ol/proj';
 import { Style, Stroke } from 'ol/style';
+import mbtaService from '../services/mbta';
 
 const MapComponent = () => {
   const mapRef = useRef(null);
@@ -54,25 +55,22 @@ const MapComponent = () => {
 
     map.setTarget(mapRef.current);
 
-    const fetchLineData = async (line, color) => {
-      const url = `https://api-v3.mbta.com/shapes?filter%5Broute%5D=${line}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const decodedCoords = Polyline.decode(
-        data.data[0].attributes.polyline
-      ).map((coord) => [coord[1], coord[0]]);
-      const lineCoords = decodedCoords.map((coord) => fromLonLat(coord));
-      const lineString = new LineString(lineCoords);
-      const feature = new Feature({
-        geometry: lineString,
-      });
-      feature.set('color', color);
+    const fetchAndAddLineData = async (line, color) => {
+      const feature = await mbtaService.fetchLineData(line);
+      feature.setStyle(
+        new Style({
+          stroke: new Stroke({
+            color,
+            width: 5,
+          }),
+        })
+      );
       vectorSource.addFeature(feature);
     };
 
-    fetchLineData('Orange', 'orange');
-    fetchLineData('Red', 'red');
-    fetchLineData('Blue', 'blue');
+    fetchAndAddLineData('Orange', 'orange');
+    fetchAndAddLineData('Red', 'red');
+    fetchAndAddLineData('Blue', 'blue');
 
     return () => {
       map.setTarget(null);
