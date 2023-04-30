@@ -9,7 +9,7 @@ function App() {
 
   return (
     <>
-      <div className ="map-container"style={{ width: '1000px', height: '1000px' }}>
+      <div className ="map-container"style={{ width: '2000px', height: '2000px' }}>
         <Map/>
       </div>
     </>
